@@ -34,7 +34,7 @@ for i in range(len(white_notes)):
 for i in range(len(black_notes)):
     black_sounds.append(mixer.Sound(f'assets\\notes\\{black_notes[i]}.wav'))
 
-pygame.display.set_caption("Pete's Python Piano")
+pygame.display.set_caption("Sanjeeiv & Srivatsans's Python Piano")
 
 
 def draw_piano(whites, blacks):
@@ -141,9 +141,9 @@ def draw_title_bar():
     screen.blit(instruction_text, (WIDTH - 500, 10))
     instruction_text2 = medium_font.render('Left/Right Arrows Change Right Hand', True, 'black')
     screen.blit(instruction_text2, (WIDTH - 500, 50))
-    title_text = font.render('Python Programmable Piano!', True, 'white')
+    title_text = font.render("Sanjeeiv & Srivatsans's Python Piano", True, 'white')
     screen.blit(title_text, (298, 18))
-    title_text = font.render('Python Programmable Piano!', True, 'black')
+    title_text = font.render("Sanjeeiv & Srivatsans's Python Piano", True, 'black')
     screen.blit(title_text, (300, 20))
 
 
@@ -179,9 +179,21 @@ while run:
     white_keys, black_keys, active_whites, active_blacks = draw_piano(active_whites, active_blacks)
     draw_hands(right_oct, left_oct, right_hand, left_hand)
     draw_title_bar()
-    for event in pygame.event.get():
+    for event in pygame.event.get():        
         if event.type == pygame.QUIT:
-            run = False
+            run = False        
+        
+        # Logic only for storing key chords in a file       
+        #  storedChords = []    # empty list 
+        #  if event.type == pygame.TEXTINPUT and ctrl+a:
+        #      flag = True
+        #      open the file
+        #  if event.type == pygame.TEXTINPUT and ctrl + b:
+        #      flag = False
+        #      write the chords list stored in "storedChords" to the text or binary file
+        #  if event.type == pygame.TEXTINPUT and ctrl + c :
+        #      open and play the file & close file 
+        
         if event.type == pygame.MOUSEBUTTONDOWN:
             black_key = False
             for i in range(len(black_keys)):
@@ -193,7 +205,12 @@ while run:
                 if white_keys[i].collidepoint(event.pos) and not black_key:
                     white_sounds[i].play(0, 3000)
                     active_whites.append([i, 30])
-        if event.type == pygame.TEXTINPUT:
+        if event.type == pygame.TEXTINPUT:      
+            
+            # Storing the chords in a list if Ctrl + a is pressed
+            # if flag == True: 
+            #     storedChords.append(event.text.upper())
+                  
             if event.text.upper() in left_dict:
                 if left_dict[event.text.upper()][1] == '#':
                     index = black_labels.index(left_dict[event.text.upper()])
