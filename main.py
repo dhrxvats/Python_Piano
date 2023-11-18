@@ -5,11 +5,11 @@ from pygame import mixer
 pygame.init()
 pygame.mixer.set_num_channels(50)
 
-font = pygame.font.Font('assets\\Terserah.ttf', 48)
-medium_font = pygame.font.Font('assets\\Terserah.ttf', 28)
-small_font = pygame.font.Font('assets\\Terserah.ttf', 16)
-real_small_font = pygame.font.Font('assets\\Terserah.ttf', 10)
-fps = 60
+font = pygame.font.Font('assets/newfont.ttf', 48)
+medium_font = pygame.font.Font('assets/Terserah.ttf', 28)
+small_font = pygame.font.Font('assets/Terserah.ttf', 16)
+real_small_font = pygame.font.Font('assets/newfont.ttf', 10)
+fps = 120
 timer = pygame.time.Clock()
 WIDTH = 52 * 35
 HEIGHT = 400
@@ -29,13 +29,12 @@ black_notes = pl.black_notes
 black_labels = pl.black_labels
 
 for i in range(len(white_notes)):
-    white_sounds.append(mixer.Sound(f'assets\\notes\\{white_notes[i]}.wav'))
+    white_sounds.append(mixer.Sound(f'assets//notes//{white_notes[i]}.wav'))
 
 for i in range(len(black_notes)):
-    black_sounds.append(mixer.Sound(f'assets\\notes\\{black_notes[i]}.wav'))
+    black_sounds.append(mixer.Sound(f'assets//notes//{black_notes[i]}.wav'))
 
-pygame.display.set_caption("Sanjeeiv & Srivatsans's Python Piano")
-
+pygame.display.set_caption("The Python Piano")
 
 def draw_piano(whites, blacks):
     white_rects = []
@@ -141,9 +140,11 @@ def draw_title_bar():
     screen.blit(instruction_text, (WIDTH - 500, 10))
     instruction_text2 = medium_font.render('Left/Right Arrows Change Right Hand', True, 'black')
     screen.blit(instruction_text2, (WIDTH - 500, 50))
-    title_text = font.render("Sanjeeiv & Srivatsans's Python Piano", True, 'white')
+    img = pygame.transform.scale(pygame.image.load('assets/MST_plugin.png'), [140, 120])
+    screen.blit(img, (-20, -30))
+    title_text = font.render('Python Programmable Piano!', True, 'white')
     screen.blit(title_text, (298, 18))
-    title_text = font.render("Sanjeeiv & Srivatsans's Python Piano", True, 'black')
+    title_text = font.render('Python Programmable Piano!', True, 'black')
     screen.blit(title_text, (300, 20))
 
 
@@ -175,25 +176,17 @@ while run:
                   '0': f'A#{right_oct}',
                   'P': f'B{right_oct}'}
     timer.tick(fps)
-    screen.fill('gray')
+    screen.fill('black')
     white_keys, black_keys, active_whites, active_blacks = draw_piano(active_whites, active_blacks)
     draw_hands(right_oct, left_oct, right_hand, left_hand)
     draw_title_bar()
-    for event in pygame.event.get():        
+    for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False        
-        
-        # Logic only for storing key chords in a file       
-        #  storedChords = []    # empty list 
-        #  if event.type == pygame.TEXTINPUT and ctrl+a:
-        #      flag = True
-        #      open the file
-        #  if event.type == pygame.TEXTINPUT and ctrl + b:
-        #      flag = False
-        #      write the chords list stored in "storedChords" to the text or binary file
-        #  if event.type == pygame.TEXTINPUT and ctrl + c :
-        #      open and play the file & close file 
-        
+            run = False
+        playedchords = []
+        if event.type ==pygame.KEYDOWN:
+            if event.key == pygame.K_a and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                print("pressed : CTRL A")
         if event.type == pygame.MOUSEBUTTONDOWN:
             black_key = False
             for i in range(len(black_keys)):
@@ -205,12 +198,7 @@ while run:
                 if white_keys[i].collidepoint(event.pos) and not black_key:
                     white_sounds[i].play(0, 3000)
                     active_whites.append([i, 30])
-        if event.type == pygame.TEXTINPUT:      
-            
-            # Storing the chords in a list if Ctrl + a is pressed
-            # if flag == True: 
-            #     storedChords.append(event.text.upper())
-                  
+        if event.type == pygame.TEXTINPUT:
             if event.text.upper() in left_dict:
                 if left_dict[event.text.upper()][1] == '#':
                     index = black_labels.index(left_dict[event.text.upper()])
