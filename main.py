@@ -1,14 +1,15 @@
 import pygame
 import piano_lists as pl
 from pygame import mixer
+import pickle
 
 pygame.init()
 pygame.mixer.set_num_channels(50)
 
-font = pygame.font.Font('assets\\Terserah.ttf', 48)
-medium_font = pygame.font.Font('assets\\Terserah.ttf', 28)
-small_font = pygame.font.Font('assets\\Terserah.ttf', 16)
-real_small_font = pygame.font.Font('assets\\Terserah.ttf', 10)
+font = pygame.font.Font('assets/Terserah.ttf', 48)
+medium_font = pygame.font.Font('assets/Terserah.ttf', 28)
+small_font = pygame.font.Font('assets/Terserah.ttf', 16)
+real_small_font = pygame.font.Font('assets/Terserah.ttf', 10)
 fps = 60
 timer = pygame.time.Clock()
 WIDTH = 52 * 35
@@ -29,10 +30,10 @@ black_notes = pl.black_notes
 black_labels = pl.black_labels
 
 for i in range(len(white_notes)):
-    white_sounds.append(mixer.Sound(f'assets\\notes\\{white_notes[i]}.wav'))
+    white_sounds.append(mixer.Sound(f'assets/notes/{white_notes[i]}.wav'))
 
 for i in range(len(black_notes)):
-    black_sounds.append(mixer.Sound(f'assets\\notes\\{black_notes[i]}.wav'))
+    black_sounds.append(mixer.Sound(f'assets/notes/{black_notes[i]}.wav'))
 
 pygame.display.set_caption("Sanjeeiv & Srivatsans's Python Piano")
 
@@ -148,6 +149,8 @@ def draw_title_bar():
 
 
 run = True
+flag = False
+storedChords = []    # empty list
 while run:
     left_dict = {'Z': f'C{left_oct}',
                  'S': f'C#{left_oct}',
@@ -182,18 +185,20 @@ while run:
     for event in pygame.event.get():        
         if event.type == pygame.QUIT:
             run = False        
-        
-        # Logic only for storing key chords in a file       
-        #  storedChords = []    # empty list 
-        #  if event.type == pygame.TEXTINPUT and ctrl+a:
-        #      flag = True
-        #      open the file
-        #  if event.type == pygame.TEXTINPUT and ctrl + b:
-        #      flag = False
-        #      write the chords list stored in "storedChords" to the text or binary file
-        #  if event.type == pygame.TEXTINPUT and ctrl + c :
-        #      open and play the file & close file 
-        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_a and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                print("pressed: CTRL + A")
+                flag = True
+            if event.key == pygame.K_b and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                print("pressed: CTRL + B")
+                flag = False
+                with open('chords_save.dat','wb') as f: 
+                    pickle.dump(storedChords,f)
+            if flag == False and event.key == pygame.K_c and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                print("pressed: CTRL + C")
+                with open('chords_save.dat','rb') as f:
+                    print(pickle.load(f))
+            
         if event.type == pygame.MOUSEBUTTONDOWN:
             black_key = False
             for i in range(len(black_keys)):
@@ -208,8 +213,8 @@ while run:
         if event.type == pygame.TEXTINPUT:      
             
             # Storing the chords in a list if Ctrl + a is pressed
-            # if flag == True: 
-            #     storedChords.append(event.text.upper())
+            if flag == True:
+                storedChords.append(event.text.upper())
                   
             if event.text.upper() in left_dict:
                 if left_dict[event.text.upper()][1] == '#':
