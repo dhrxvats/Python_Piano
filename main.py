@@ -14,7 +14,7 @@ fps = 60
 timer = pygame.time.Clock()
 WIDTH = 52 * 35
 HEIGHT = 400
-screen = pygame.display.set_mode([WIDTH, HEIGHT])
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 white_sounds = []
 black_sounds = []
 active_whites = []
@@ -52,10 +52,10 @@ def draw_piano(whites, blacks):
     black_rects = []
     for i in range(36):
         rect = pygame.draw.rect(screen, 'black', [23 + (i * 35) + (skip_count * 35), HEIGHT - 300, 24, 200], 0, 2)
-        for q in range(len(blacks)):
+        for q in range(len(blacks)):   #need more clarification here 
             if blacks[q][0] == i:
                 if blacks[q][1] > 0:
-                    pygame.draw.rect(screen, 'green', [23 + (i * 35) + (skip_count * 35), HEIGHT - 300, 24, 200], 2, 2)
+                    pygame.draw.rect(screen, 'red', [23 + (i * 35) + (skip_count * 35), HEIGHT - 300, 24, 200], 2, 2)
                     blacks[q][1] -= 1
 
         key_label = real_small_font.render(black_labels[i], True, 'white')
@@ -79,13 +79,13 @@ def draw_piano(whites, blacks):
 
     return white_rects, black_rects, whites, blacks
 
-
+#till here.
 def draw_hands(rightOct, leftOct, rightHand, leftHand):
     # left hand
     pygame.draw.rect(screen, 'dark gray', [(leftOct * 245) - 175, HEIGHT - 60, 245, 30], 0, 4)
     pygame.draw.rect(screen, 'black', [(leftOct * 245) - 175, HEIGHT - 60, 245, 30], 4, 4)
-    text = small_font.render(leftHand[0], True, 'white')
-    screen.blit(text, ((leftOct * 245) - 165, HEIGHT - 55))
+    text = small_font.render(leftHand[0], True, 'white') #typing the notes in the left octave at 4th octave
+    screen.blit(text, ((leftOct * 245) - 165, HEIGHT - 55))  # we first take the white keys and then fill up alternate black and white for left and right oct
     text = small_font.render(leftHand[2], True, 'white')
     screen.blit(text, ((leftOct * 245) - 130, HEIGHT - 55))
     text = small_font.render(leftHand[4], True, 'white')
@@ -97,7 +97,7 @@ def draw_hands(rightOct, leftOct, rightHand, leftHand):
     text = small_font.render(leftHand[9], True, 'white')
     screen.blit(text, ((leftOct * 245) + 10, HEIGHT - 55))
     text = small_font.render(leftHand[11], True, 'white')
-    screen.blit(text, ((leftOct * 245) + 45, HEIGHT - 55))
+    screen.blit(text, ((leftOct * 245) + 45, HEIGHT - 55))  #we can change the comma here to add c in the left octave for better playability
     text = small_font.render(leftHand[1], True, 'black')
     screen.blit(text, ((leftOct * 245) - 148, HEIGHT - 55))
     text = small_font.render(leftHand[3], True, 'black')
@@ -178,7 +178,7 @@ while run:
                   '0': f'A#{right_oct}',
                   'P': f'B{right_oct}'}
     timer.tick(fps)
-    screen.fill('gray')
+    screen.fill('black')
     white_keys, black_keys, active_whites, active_blacks = draw_piano(active_whites, active_blacks)
     draw_hands(right_oct, left_oct, right_hand, left_hand)
     draw_title_bar()
@@ -197,43 +197,56 @@ while run:
             if flag == False and event.key == pygame.K_c and pygame.key.get_mods() & pygame.KMOD_CTRL:
                 print("pressed: CTRL + C")
                 with open('chords_save.dat','rb') as f:
-                    print(pickle.load(f))
-            
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            black_key = False
-            for i in range(len(black_keys)):
-                if black_keys[i].collidepoint(event.pos):
-                    black_sounds[i].play(0, 1000)
-                    black_key = True
-                    active_blacks.append([i, 30])
-            for i in range(len(white_keys)):
+                    musicstored = pickle.load(f)
+                    print(musicstored)
+                    for sounds in musicstored:
+                        if sounds[0] == 'B':
+                            black_sounds[sounds[1]].play(0, 1000)
+                            active_blacks.append([sounds[1], 30])
+                        elif sounds[0] == 'W':
+                            white_sounds[sounds[1]].play(0,1000)
+                            active_whites.append([sounds[1],30])
+
+        if event.type == pygame.MOUSEBUTTONDOWN: #we are checking for mouseclicking on the surface
+            black_key = False   #checking for black_keys/flag only.
+            for i in range(len(black_keys)):  #iterating over this
+                if black_keys[i].collidepoint(event.pos):  #if the collision of the mouse is the same as the position of the pointer of the event we play the sound.
+                    black_sounds[i].play(0, 1000)   #we are playing the black key
+                    black_key = True   #we dont want to play the white key when we are playing a black key
+                    active_blacks.append([i,30])   #to play the 5 black sound if we press the 5th black key or so on for i and 30 is the half second for which a green rectangle will be active for.
+            for i in range(len(white_keys)):        
                 if white_keys[i].collidepoint(event.pos) and not black_key:
                     white_sounds[i].play(0, 3000)
-                    active_whites.append([i, 30])
+                    active_whites.append([i,30])
         if event.type == pygame.TEXTINPUT:      
             
             # Storing the chords in a list if Ctrl + a is pressed
-            if flag == True:
-                storedChords.append(event.text.upper())
-                  
             if event.text.upper() in left_dict:
                 if left_dict[event.text.upper()][1] == '#':
                     index = black_labels.index(left_dict[event.text.upper()])
                     black_sounds[index].play(0, 1000)
                     active_blacks.append([index, 30])
+                    if flag == True:
+                        storedChords.append(['B',index])
                 else:
                     index = white_notes.index(left_dict[event.text.upper()])
                     white_sounds[index].play(0, 1000)
                     active_whites.append([index, 30])
+                    if flag == True:
+                        storedChords.append(['W',index])
             if event.text.upper() in right_dict:
                 if right_dict[event.text.upper()][1] == '#':
                     index = black_labels.index(right_dict[event.text.upper()])
                     black_sounds[index].play(0, 1000)
                     active_blacks.append([index, 30])
+                    if flag == True:
+                        storedChords.append(['B',index])
                 else:
                     index = white_notes.index(right_dict[event.text.upper()])
                     white_sounds[index].play(0, 1000)
                     active_whites.append([index, 30])
+                    if flag == True:
+                        storedChords.append(['W',index])
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
